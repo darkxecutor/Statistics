@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول | موقع الإحصائيات</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles/main.css">
+</head>
+<body class="login-page">
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <main class="login-container">
+    <div class="login-card">
+      <img src="assets/images/logo.svg" alt="شعار الموقع" class="login-logo">
+      <h1>موقع الإحصائيات</h1>
+      <p class="login-subtitle">تتبّع مهامك وأهدافك الأسبوعية بذكاء</p>
+
+      <div class="login-actions">
+        <div id="g_id_signin" class="gsi-container"></div>
+        <button id="demoBtn" type="button" class="btn btn-demo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          الدخول السريع (وضع تجريبي)
+        </button>
+      </div>
+
+      <div class="login-hint">
+        <span>🔒</span>
+        <p>يتم حفظ جلستك تلقائيًا في هذا المتصفح</p>
+      </div>
+    </div>
+
+    <footer class="login-footer">
+      <p>© <span id="year"></span> موقع الإحصائيات — جميع الحقوق محفوظة</p>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // إن كان المستخدم مسجلاً بالفعل → انتقل للوحة التحكم
+    Auth.redirectIfLoggedIn();
+  </script>
+</body>
+</html>
