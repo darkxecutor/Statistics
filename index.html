@@ -1,58 +1,321 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تسجيل الدخول | موقع الإحصائيات</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/styles/main.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0f0f">
+<title>STATISTICS — إحصائيات الإنجاز</title>
+<meta name="description" content="STATISTICS — لوحة متابعة المهام والأهداف اليومية والأسبوعية والشهرية مع إحصائيات ومخططات ومكافآت.">
+
+<!-- الخطوط -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+<!-- الأنماط -->
+<link rel="stylesheet" href="css/style.css">
+
+<!-- مكتبة المخططات -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<!-- وحدات التطبيق (بالترتيب) -->
+<script src="js/storage.js" defer></script>
+<script src="js/audio.js" defer></script>
+<script src="js/effects.js" defer></script>
+<script src="js/charts.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/app.js" defer></script>
 </head>
-<body class="login-page">
-  <div class="bg-blobs">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
+<body>
+
+<!-- ============================================================
+     شاشة تسجيل الدخول
+     ============================================================ -->
+<section id="login-screen" class="login-screen">
+  <div class="login-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <div class="login-card">
+    <div class="logo-block">
+      <svg class="logo-svg" viewBox="0 0 64 64" role="img" aria-label="شعار STATISTICS">
+        <defs>
+          <linearGradient id="lgA" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#a67c00"/>
+            <stop offset="100%" stop-color="#ffd75e"/>
+          </linearGradient>
+        </defs>
+        <rect x="5"  y="38" width="11" height="20" rx="2.5" fill="url(#lgA)"/>
+        <rect x="20" y="28" width="11" height="30" rx="2.5" fill="url(#lgA)" opacity=".82"/>
+        <rect x="35" y="16" width="11" height="42" rx="2.5" fill="url(#lgA)"/>
+        <circle cx="52" cy="16" r="7.5" fill="none" stroke="#f4c430" stroke-width="3"/>
+        <circle cx="52" cy="16" r="2.2" fill="#f4c430"/>
+      </svg>
+      <h1>STATISTICS</h1>
+      <span class="logo-sub">لوحة الإنجاز الشخصية</span>
+    </div>
+
+    <p class="login-tagline">تتبّع مهامك اليومية، وحوّل انضباطك إلى أرقام تُلهمك.</p>
+
+    <div id="gsi-button" class="gsi-button"></div>
+
+    <div class="login-divider"><span>أو</span></div>
+
+    <div class="demo-row">
+      <input id="demo-name" class="input type-crack" type="text"
+             placeholder="اسمك — للدخول المحلي على هذا الجهاز" autocomplete="off">
+      <button id="demo-login" class="btn btn-ghost" type="button">دخول سريع</button>
+    </div>
+
+    <p class="login-note">الدخول عبر Google يربط بياناتك بحسابك ويحفظها تلقائيًا.</p>
+
+    <ul class="login-features">
+      <li><span>◆</span> جدول يومي صباحي ومسائي بلا حدود</li>
+      <li><span>◆</span> إحصائيات أسبوعية وشهرية وسنوية</li>
+      <li><span>◆</span> نظام مكافآت عند تجاوز 85%</li>
+    </ul>
+
+    <p id="gsi-fallback-note" class="login-note hidden">
+      تعذّر تحميل خدمة Google — يمكنك استخدام الدخول السريع أعلاه.
+    </p>
   </div>
+</section>
 
-  <main class="login-container">
-    <div class="login-card">
-      <img src="assets/images/logo.svg" alt="شعار الموقع" class="login-logo">
-      <h1>موقع الإحصائيات</h1>
-      <p class="login-subtitle">تتبّع مهامك وأهدافك الأسبوعية بذكاء</p>
+<!-- ============================================================
+     التطبيق
+     ============================================================ -->
+<div id="app" class="app hidden">
 
-      <div class="login-actions">
-        <div id="g_id_signin" class="gsi-container"></div>
-        <button id="demoBtn" type="button" class="btn btn-demo">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
-          </svg>
-          الدخول السريع (وضع تجريبي)
-        </button>
-      </div>
-
-      <div class="login-hint">
-        <span>🔒</span>
-        <p>يتم حفظ جلستك تلقائيًا في هذا المتصفح</p>
+  <header class="app-header">
+    <div class="brand">
+      <svg class="logo-svg small" viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <linearGradient id="lgB" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#a67c00"/>
+            <stop offset="100%" stop-color="#ffd75e"/>
+          </linearGradient>
+        </defs>
+        <rect x="5"  y="38" width="11" height="20" rx="2.5" fill="url(#lgB)"/>
+        <rect x="20" y="28" width="11" height="30" rx="2.5" fill="url(#lgB)" opacity=".82"/>
+        <rect x="35" y="16" width="11" height="42" rx="2.5" fill="url(#lgB)"/>
+        <circle cx="52" cy="16" r="7.5" fill="none" stroke="#f4c430" stroke-width="3"/>
+      </svg>
+      <div class="brand-text">
+        <strong>STATISTICS</strong>
+        <span>لوحة الإنجاز</span>
       </div>
     </div>
 
-    <footer class="login-footer">
-      <p>© <span id="year"></span> موقع الإحصائيات — جميع الحقوق محفوظة</p>
-    </footer>
+    <nav class="tabs" id="main-tabs" aria-label="التنقل الرئيسي">
+      <button class="tab active" data-view="dashboard">لوحة التحكم</button>
+      <button class="tab" data-view="daily">اليومي</button>
+      <button class="tab" data-view="weekly">الأسبوعي</button>
+      <button class="tab" data-view="monthly">الشهري</button>
+      <button class="tab" data-view="settings">الإعدادات</button>
+    </nav>
+
+    <div class="user-chip">
+      <img id="user-avatar" alt="صورة المستخدم" width="34" height="34" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'><rect width='34' height='34' fill='%231f1f1f'/><circle cx='17' cy='13' r='6' fill='%23f4c430'/><path d='M5 30c2-6 8-9 12-9s10 3 12 9z' fill='%23f4c430'/></svg>">
+      <span id="user-name">مستخدم</span>
+      <button id="logout-btn" class="btn btn-icon" title="تسجيل الخروج" aria-label="تسجيل الخروج">⏻</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- لوحة التحكم -->
+    <section id="view-dashboard" class="view">
+      <div class="view-head">
+        <h2>لوحة التحكم</h2>
+        <p id="dashboard-subtitle" class="muted"></p>
+      </div>
+
+      <div class="counters">
+        <div class="counter card"><span class="counter-value" id="c-done">0</span><span class="counter-label">مهام منجزة</span></div>
+        <div class="counter card"><span class="counter-value" id="c-total">0</span><span class="counter-label">إجمالي الأهداف</span></div>
+        <div class="counter card"><span class="counter-value" id="c-today">0%</span><span class="counter-label">إنجاز اليوم</span></div>
+        <div class="counter card"><span class="counter-value" id="c-week">0%</span><span class="counter-label">إنجاز الأسبوع</span></div>
+        <div class="counter card"><span class="counter-value" id="c-month">0%</span><span class="counter-label">إنجاز الشهر</span></div>
+        <div class="counter card"><span class="counter-value" id="c-active">0</span><span class="counter-label">أيام نشطة</span></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card chart-card">
+          <h3>آخر 7 أيام — نسبة الإنجاز</h3>
+          <div class="chart-box"><canvas id="chart-dash-bar"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <h3>توزيع مهام الشهر الحالي</h3>
+          <div class="chart-box"><canvas id="chart-dash-pie"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>جداولي المخصصة</h3>
+          <button id="toggle-new-table" class="btn btn-gold" type="button">+ جدول جديد</button>
+        </div>
+
+        <form id="new-table-form" class="new-table-form hidden">
+          <input id="new-table-name" class="input type-crack" type="text" placeholder="اسم الجدول (مثال: متابعة الرياضة)">
+          <input id="new-table-cols" class="input type-crack" type="text" placeholder="الأعمدة مفصولة بفاصلة (مثال: التمرين، المدة، ملاحظة)">
+          <button class="btn btn-gold" type="submit">إنشاء الجدول</button>
+        </form>
+
+        <div id="custom-tables" class="custom-tables"></div>
+      </div>
+    </section>
+
+    <!-- الجدول اليومي -->
+    <section id="view-daily" class="view hidden">
+      <div class="view-head row">
+        <h2>الجدول اليومي</h2>
+        <div class="date-nav">
+          <button class="btn btn-icon" id="day-prev" type="button" aria-label="اليوم السابق">›</button>
+          <span id="day-label" class="date-label"></span>
+          <button class="btn btn-icon" id="day-next" type="button" aria-label="اليوم التالي">‹</button>
+          <button class="btn btn-ghost" id="day-today" type="button">اليوم</button>
+        </div>
+      </div>
+
+      <div class="mini-stats" id="day-stats"></div>
+
+      <div class="periods" id="daily-periods"></div>
+
+      <div class="grid-2">
+        <div class="card chart-card">
+          <h3>المخطط العمودي — المدة لكل مهمة</h3>
+          <div class="chart-box"><canvas id="chart-daily-bar"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <h3>المخطط الدائري — توزيع المهام</h3>
+          <div class="chart-box"><canvas id="chart-daily-pie"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- الأسبوعي -->
+    <section id="view-weekly" class="view hidden">
+      <div class="view-head row">
+        <h2>الجدول الأسبوعي</h2>
+        <div class="date-nav">
+          <button class="btn btn-icon" id="week-prev" type="button" aria-label="الأسبوع السابق">›</button>
+          <span id="week-label" class="date-label"></span>
+          <button class="btn btn-icon" id="week-next" type="button" aria-label="الأسبوع التالي">‹</button>
+        </div>
+      </div>
+
+      <div class="mini-stats" id="week-stats"></div>
+
+      <div class="grid-2">
+        <div class="card chart-card">
+          <h3>نسبة الإنجاز لكل يوم</h3>
+          <div class="chart-box"><canvas id="chart-week-bar"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <h3>توزيع مهام الأسبوع</h3>
+          <div class="chart-box"><canvas id="chart-week-pie"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>تفصيل الأيام</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>اليوم</th><th>المهام</th><th>منجز</th><th>غير منجز</th><th>معلّق</th><th>النسبة</th></tr></thead>
+            <tbody id="week-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- الشهري -->
+    <section id="view-monthly" class="view hidden">
+      <div class="view-head row">
+        <h2>الجدول الشهري</h2>
+        <div class="date-nav">
+          <button class="btn btn-icon" id="month-prev" type="button" aria-label="الشهر السابق">›</button>
+          <span id="month-label" class="date-label"></span>
+          <button class="btn btn-icon" id="month-next" type="button" aria-label="الشهر التالي">‹</button>
+        </div>
+      </div>
+
+      <div id="monthly-reward"></div>
+
+      <div class="mini-stats" id="month-stats"></div>
+
+      <div class="grid-2">
+        <div class="card chart-card">
+          <h3>نسبة الإنجاز لكل أسبوع</h3>
+          <div class="chart-box"><canvas id="chart-month-bar"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <h3>توزيع مهام الشهر</h3>
+          <div class="chart-box"><canvas id="chart-month-pie"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>تفصيل الأسابيع</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>الأسبوع</th><th>المهام</th><th>منجز</th><th>غير منجز</th><th>معلّق</th><th>النسبة</th></tr></thead>
+            <tbody id="month-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- الإعدادات -->
+    <section id="view-settings" class="view hidden">
+      <div class="view-head"><h2>الإعدادات</h2></div>
+
+      <div class="card">
+        <h3>الحساب</h3>
+        <div id="account-info" class="account-info"></div>
+      </div>
+
+      <div class="card">
+        <h3>نظام المكافآت</h3>
+        <div class="settings-grid">
+          <label class="field"><span>وصف المكافأة الشهرية</span>
+            <input id="set-reward" class="input type-crack" type="text" placeholder="مثال: رحلة قصيرة / هدية / يوم راحة كامل">
+          </label>
+          <label class="field"><span>قيمة المكافأة (اختياري)</span>
+            <input id="set-reward-value" class="input type-crack" type="text" placeholder="مثال: 500 درهم">
+          </label>
+          <label class="field"><span>نسبة الإنجاز المطلوبة (%)</span>
+            <input id="set-target" class="input" type="number" min="1" max="100" value="85">
+          </label>
+          <label class="field"><span>الحد الأدنى لمهام اليوم</span>
+            <input id="set-min" class="input" type="number" min="1" max="200" value="20">
+          </label>
+        </div>
+        <button id="save-settings" class="btn btn-gold" type="button">حفظ الإعدادات</button>
+      </div>
+
+      <div class="card">
+        <h3>البيانات</h3>
+        <p class="muted">جميع بياناتك محفوظة تلقائيًا على هذا الجهاز ومرتبطة بحسابك.</p>
+        <div class="settings-actions">
+          <button id="export-data" class="btn btn-ghost" type="button">تصدير نسخة احتياطية (JSON)</button>
+          <label class="btn btn-ghost file-btn">استيراد نسخة
+            <input type="file" id="import-data" accept="application/json" hidden>
+          </label>
+          <button id="reset-data" class="btn btn-danger" type="button">حذف كل البيانات</button>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <div id="toast" class="toast"></div>
+  <footer class="app-footer"><span>STATISTICS — كل إنجاز صغير يُحتسب.</span></footer>
+</div>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="js/storage.js"></script>
-  <script src="js/auth.js"></script>
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-    // إن كان المستخدم مسجلاً بالفعل → انتقل للوحة التحكم
-    Auth.redirectIfLoggedIn();
-  </script>
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+<noscript><p style="padding:2rem;text-align:center">يجب تفعيل JavaScript لتشغيل الموقع.</p></noscript>
+
 </body>
 </html>
