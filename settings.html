@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإعدادات | موقع الإحصائيات</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles/main.css">
+</head>
+<body class="settings-page">
+
+  <header class="topbar">
+    <div class="topbar-right">
+      <a href="dashboard.html" class="icon-btn" title="رجوع">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <img src="assets/images/logo.svg" alt="Logo" class="topbar-logo">
+      <span class="topbar-brand">الإعدادات</span>
+    </div>
+    <div class="topbar-left">
+      <button id="themeToggle" class="icon-btn" title="تبديل الوضع">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="settings-main">
+    <section class="card">
+      <div class="card-header"><h2>👤 معلومات الحساب</h2></div>
+      <div class="account-info">
+        <img id="settingsAvatar" src="assets/images/avatar.svg" alt="avatar" class="account-avatar">
+        <div>
+          <p class="account-name" id="settingsName">—</p>
+          <p class="account-email" id="settingsEmail">—</p>
+          <p class="account-mode" id="settingsMode">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2>💾 إدارة البيانات</h2></div>
+      <div class="settings-actions">
+        <button id="exportBtn" class="btn btn-primary">⬇️ تصدير البيانات (JSON)</button>
+        <label class="btn btn-secondary" for="importInput">⬆️ استيراد البيانات</label>
+        <input type="file" id="importInput" accept=".json" hidden>
+        <button id="clearDataBtn" class="btn btn-danger">🗑️ حذف كل البيانات</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2>ℹ️ حول الموقع</h2></div>
+      <p class="about-text">
+        موقع الإحصائيات هو أداة لإنشاء جداول مخصصة لتتبع مهامك وأهدافك الأسبوعية، مع عرض بيانات التقدم عبر مخططات عمودية ودائرية. جميع البيانات تُخزن محليًا في متصفحك.
+      </p>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>
