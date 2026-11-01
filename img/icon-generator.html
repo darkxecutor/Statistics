@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>مولّد أيقونات STATISTICS</title>
+<style>
+  body{ background:#0f0f0f; color:#f2efe6; font-family:'Cairo',sans-serif;
+        padding:30px; max-width:900px; margin:auto; text-align:center; }
+  h1{ color:#f4c430; }
+  .drop{ border:2px dashed rgba(244,196,48,.5); border-radius:16px;
+         padding:40px; margin:20px 0; cursor:pointer; transition:.3s; }
+  .drop:hover{ background:rgba(244,196,48,.06); }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+         gap:16px; margin-top:20px; }
+  .item{ background:#181818; border:1px solid rgba(244,196,48,.2);
+         border-radius:12px; padding:14px; }
+  .item img{ width:120px; height:120px; object-fit:contain;
+             background:#0f0f0f; border-radius:8px; margin-bottom:8px;
+             border:1px solid rgba(244,196,48,.25); }
+  .item strong{ display:block; font-size:.82rem; color:#f4c430; margin-bottom:4px; }
+  .item a{ display:inline-block; margin-top:6px; padding:6px 14px;
+           background:linear-gradient(180deg,#ffd75e,#f4c430); color:#0f0f0f;
+           border-radius:6px; font-weight:700; font-size:.78rem;
+           text-decoration:none; }
+  .hint{ color:#9a948a; font-size:.85rem; margin-top:20px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<h1>مولّد أيقونات STATISTICS</h1>
+<p>اختر ملف الشعار (يُفضّل أن يكون مربعًا بدقة ≥ 512×512):</p>
+
+<label class="drop" for="file">
+  📁 اضغط لاختيار الصورة
+  <input id="file" type="file" accept="image/*" hidden>
+</label>
+
+<div id="previews" class="grid"></div>
+
+<p class="hint" id="hint">
+  بعد التوليد، نزّل كل ملف وضعه في مجلد <code>img/</code>.<br>
+  الأيقونات التي اسمها <strong>maskable</strong> تحتوي هامش 15% داخلي لتفادي القص.
+</p>
+
+<script>
+const SIZES = [
+  { name: 'icon-192.png',           size: 192, padding: 0.00 },
+  { name: 'icon-512.png',           size: 512, padding: 0.00 },
+  { name: 'icon-maskable-192.png',  size: 192, padding: 0.15 },
+  { name: 'icon-maskable-512.png',  size: 512, padding: 0.15 },
+  { name: 'apple-touch-icon.png',   size: 180, padding: 0.00 }
+];
+
+const fileInput = document.getElementById('file');
+const previews  = document.getElementById('previews');
+
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const img = await loadImage(file);
+  previews.innerHTML = '';
+
+  for (const spec of SIZES) {
+    const canvas = drawIcon(img, spec.size, spec.padding);
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const url  = URL.createObjectURL(blob);
+
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <img src="${url}" alt="${spec.name}">
+      <strong>${spec.name}</strong>
+      <span style="font-size:.72rem;color:#9a948a">${spec.size}×${spec.size}</span><br>
+      <a href="${url}" download="${spec.name}">⬇ تنزيل</a>
+    `;
+    previews.appendChild(div);
+  }
+});
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function drawIcon(img, size, paddingRatio) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // خلفية سوداء عميقة
+  ctx.fillStyle = '#0f0f0f';
+  ctx.fillRect(0, 0, size, size);
+
+  // مساحة الشعار داخل الأيقونة (أقل بسبب الهامش)
+  const pad = size * paddingRatio;
+  const inner = size - pad * 2;
+
+  // نحسب مربعًا يحافظ على نسبة الصورة دون تشويه
+  const ratio = img.width / img.height;
+  let w = inner, h = inner;
+  if (ratio > 1) h = inner / ratio; else w = inner * ratio;
+
+  const x = pad + (inner - w) / 2;
+  const y = pad + (inner - h) / 2;
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, x, y, w, h);
+
+  return canvas;
+}
+</script>
+</body>
+</html>
