@@ -92,8 +92,7 @@ if ('serviceWorker' in navigator) {
       <button class="btn btn-gold install-app-btn" type="button" hidden>
         📲 تثبيت كتطبيق
       </button>
-      <a href="statistics.apk" download
-         class="btn btn-ghost apk-download-btn">
+      <a href="statistics.apk" download class="btn btn-ghost apk-download-btn">
         ⬇ تنزيل APK
       </a>
     </div>
@@ -328,6 +327,26 @@ if ('serviceWorker' in navigator) {
         </p>
       </div>
 
+      <!-- ✅ إحصائيات المنصة (جديدة) -->
+      <div class="card" id="platform-stats-card">
+        <h3>إحصائيات المنصة (عام)</h3>
+        <p class="muted">إحصائيات مجهولة المصدر لجميع المستخدمين المسجلين.</p>
+        <div class="mini-stats" style="margin-top: 15px;">
+          <div class="mini-stat">
+            <strong id="global-users" style="color:#f4c430">...</strong>
+            <span>إجمالي المسجلين</span>
+          </div>
+          <div class="mini-stat">
+            <strong id="global-logins" style="color:#4a90e2">...</strong>
+            <span>إجمالي الدخولات</span>
+          </div>
+          <div class="mini-stat">
+            <strong id="global-active" style="color:#3fbf7f">مباشر</strong>
+            <span>حالة الخادم</span>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <h3>البيانات</h3>
         <p class="muted">جميع بياناتك محفوظة تلقائيًا على هذا الجهاز ومرتبطة بحسابك.</p>
@@ -349,6 +368,32 @@ if ('serviceWorker' in navigator) {
 <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
 <noscript><p style="padding:2rem;text-align:center">يجب تفعيل JavaScript.</p></noscript>
+
+<!-- ============================================================
+     ✅ Firebase SDK (محدث بإعداداتك)
+     ============================================================ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // إعدادات مشروعك من Firebase Console
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7QTJQ7NJitT84KDLb5JwxsCKrdk9kfmc",
+    authDomain: "statistics-app-44843.firebaseapp.com",
+    projectId: "statistics-app-44843",
+    storageBucket: "statistics-app-44843.firebasestorage.app",
+    messagingSenderId: "583897249169",
+    appId: "1:583897249169:web:0ef6881a6448b3c11ed630",
+    measurementId: "G-GTPTYS5VXW"
+  };
+
+  // تهيئة Firebase
+  const app = initializeApp(firebaseConfig);
+  
+  // جعل قاعدة البيانات متاحة لباقي ملفات الجافاسكربت (app.js و auth.js)
+  window.db = getFirestore(app);
+  console.log("✅ Firebase متصل بنجاح بقاعدة البيانات");
+</script>
 
 </body>
 </html>
