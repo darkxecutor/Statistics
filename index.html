@@ -8,13 +8,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="STATISTICS">
-<title>STATISTICS</title>
+<title>STATISTICS — إحصائيات الإنجاز</title>
 <meta name="description" content="STATISTICS — لوحة متابعة المهام والأهداف اليومية والأسبوعية والشهرية مع إحصائيات ومخططات ومكافآت.">
 
-<!-- ✅ الفافيكون والأيقونات (مجلد img) -->
-<link rel="icon" type="image/jpeg" href="img/logo.jpeg">
-<link rel="shortcut icon" type="image/jpeg" href="img/logo.jpeg">
-<link rel="apple-touch-icon" href="img/logo.jpeg">
+<!-- ✅ الأيقونات الواضحة (PNG بحجم صحيح) -->
+<link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="img/icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
 
 <!-- ✅ PWA -->
 <link rel="manifest" href="manifest.json">
@@ -41,7 +41,7 @@
 <script src="js/auth.js" defer></script>
 <script src="js/app.js" defer></script>
 
-<!-- ✅ تسجيل Service Worker (العمل بدون إنترنت) -->
+<!-- ✅ تسجيل Service Worker -->
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -62,7 +62,7 @@ if ('serviceWorker' in navigator) {
 
   <div class="login-card">
     <div class="logo-block">
-      <img src="img/logo.jpeg" alt="شعار STATISTICS" class="logo-img" width="84" height="84">
+      <img src="img/icon-512.png" alt="شعار STATISTICS" class="logo-img" width="84" height="84">
       <h1>STATISTICS</h1>
       <span class="logo-sub">لوحة الإنجاز الشخصية</span>
     </div>
@@ -92,8 +92,8 @@ if ('serviceWorker' in navigator) {
       <button class="btn btn-gold install-app-btn" type="button" hidden>
         📲 تثبيت كتطبيق
       </button>
-      <a href="statistics.apk" download id="download-apk-login"
-         class="btn btn-ghost apk-download-btn" type="button">
+      <a href="statistics.apk" download
+         class="btn btn-ghost apk-download-btn">
         ⬇ تنزيل APK
       </a>
     </div>
@@ -111,7 +111,7 @@ if ('serviceWorker' in navigator) {
 
   <header class="app-header">
     <div class="brand">
-      <img src="img/logo.jpeg" alt="" class="brand-logo" width="38" height="38">
+      <img src="img/icon-192.png" alt="" class="brand-logo" width="38" height="38">
       <div class="brand-text">
         <strong>STATISTICS</strong>
         <span>لوحة الإنجاز</span>
