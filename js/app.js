@@ -1,5 +1,11 @@
 /* ============================================================
-   app.js — منطق التطبيق والواجهات
+   app.js — منطق التطبيق والواجهات (النسخة المعدّلة الكاملة)
+   ------------------------------------------------------------
+   التعديلات المضافة:
+   ✅ ألوان مخصصة لكل إحصاء (عدادات + بطاقات مصغّرة + مخططات)
+   ✅ دعم PWA (زر تثبيت)
+   ✅ زر تنزيل APK مع التحقق من وجود الملف
+   ✅ معالجة كاملة للاستجابة على الجوال
    ============================================================ */
 'use strict';
 
@@ -14,6 +20,21 @@
     currentMonth: Store.startOfMonth(new Date()),
     activeView: 'dashboard',
     chartTimer: null
+  };
+
+  /* ============================================================
+     ✅ لوحة ألوان مخصصة لكل إحصاء — لتمييز واضح
+     ============================================================ */
+  const ChartColors = {
+    /* 7 أيام الأسبوع */
+    days: ['#f4c430', '#3fbf7f', '#e07a5f', '#4a90e2', '#c77dff', '#ff6b9d', '#f9a826'],
+    /* أسابيع الشهر */
+    weeks: ['#f4c430', '#3fbf7f', '#4a90e2', '#c77dff', '#f9a826', '#ff6b9d'],
+    /* حالة المهام */
+    status: ['#3fbf7f', '#e63946', '#f9a826'],   // منجز، غير منجز، معلّق
+    /* مهام اليوم (حتى 10) */
+    tasks: ['#f4c430', '#3fbf7f', '#e07a5f', '#4a90e2', '#c77dff',
+            '#ff6b9d', '#f9a826', '#06d6a0', '#ef476f', '#118ab2']
   };
 
   /* ============================================================
@@ -53,10 +74,72 @@
     };
   }
 
-  function pctClass(p) {
-    if (p >= 85) return 'ok';
-    if (p >= 50) return 'mid';
-    return 'low';
+  /* ✅ لون النسبة حسب قيمتها */
+  function pctColor(p) {
+    if (p >= 85) return '#3fbf7f';   // أخضر
+    if (p >= 50) return '#f9a826';   // برتقالي
+    return '#e63946';                // أحمر
+  }
+
+  /* ✅ بطاقة إحصاء مصغّرة بلون مخصص */
+  function miniStat(value, label, color) {
+    const c = color || '#ffd75e';
+    return '<div class="mini-stat">' +
+           '<strong style="color:' + c + '">' + value + '</strong>' +
+           '<span>' + label + '</span>' +
+           '</div>';
+  }
+
+  /* ============================================================
+     ✅ PWA + APK — المتغيرات والمعالجات
+     ============================================================ */
+  let deferredInstallPrompt = null;
+
+  /* يُستدعى عند إمكانية التثبيت */
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    document.querySelectorAll('.install-app-btn').forEach(b => { b.hidden = false; });
+  });
+
+  /* يُستدعى بعد تثبيت التطبيق */
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    showToast('تم تثبيت التطبيق بنجاح 🎉', 'ok');
+  });
+
+  /* معالج زر "تثبيت كتطبيق" */
+  async function handleInstallClick() {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      try {
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') showToast('بدء التثبيت…', 'ok');
+      } catch (err) {}
+      deferredInstallPrompt = null;
+      return;
+    }
+    showToast('لتثبيت التطبيق: من قائمة المتصفح اختر "إضافة إلى الشاشة الرئيسية"، أو نزّل APK.', 'err');
+  }
+
+  /* معالج زر تنزيل APK — يتحقق من وجود الملف */
+  async function handleApkDownload(e) {
+    if (e) e.preventDefault();
+    const candidates = [
+      'statistics.apk',
+      'app/statistics.apk',
+      'downloads/statistics.apk'
+    ];
+    for (const url of candidates) {
+      try {
+        const r = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+        if (r.ok) {
+          window.location.href = url;
+          return;
+        }
+      } catch (err) { /* تجاهل */ }
+    }
+    showToast('ملف APK غير متوفر بعد — راجع README لبنائه ورفعه باسم statistics.apk.', 'err');
   }
 
   /* ============================================================
@@ -66,6 +149,9 @@
     initTypingEffects();
     initButtonSounds();
     bindLoginEvents();
+
+    /* أزرار PWA/APK متاحة قبل الدخول */
+    bindInstallButtons();
 
     const session = Store.readSession();
     if (session) {
@@ -111,6 +197,19 @@
     }
   }
 
+  /* ربط أزرار التثبيت/APK — آمن للاستدعاء أكثر من مرة */
+  let installBound = false;
+  function bindInstallButtons() {
+    if (installBound) return;
+    installBound = true;
+    document.querySelectorAll('.install-app-btn').forEach(btn => {
+      btn.addEventListener('click', handleInstallClick);
+    });
+    document.querySelectorAll('.apk-download-btn').forEach(link => {
+      link.addEventListener('click', handleApkDownload);
+    });
+  }
+
   function showLogin() {
     const login = document.getElementById('login-screen');
     const app = document.getElementById('app');
@@ -153,6 +252,15 @@
     if (appEventsBound) return;
     appEventsBound = true;
 
+    /* زر الخروج */
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        Auth.logout();
+        location.reload();
+      });
+    }
+
     /* التبويبات */
     const tabs = document.getElementById('main-tabs');
     if (tabs) {
@@ -160,15 +268,6 @@
         const btn = e.target.closest('.tab');
         if (!btn) return;
         switchView(btn.dataset.view);
-      });
-    }
-
-    /* تسجيل الخروج */
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
-        Auth.logout();
-        location.reload();
       });
     }
 
@@ -274,6 +373,9 @@
 
     const resetBtn = document.getElementById('reset-data');
     if (resetBtn) resetBtn.addEventListener('click', resetData);
+
+    /* ✅ أزرار التثبيت/APK داخل التطبيق (الإعدادات) */
+    bindInstallButtons();
   }
 
   /* ============================================================
@@ -334,7 +436,7 @@
 
     updateCounters();
 
-    /* مخطط آخر 7 أيام */
+    /* مخطط آخر 7 أيام — ✅ لون مختلف لكل يوم */
     const labels = [], values = [];
     const start = Store.addDays(new Date(), -6);
     for (let i = 0; i < 7; i++) {
@@ -343,14 +445,17 @@
       labels.push(Store.AR_DAYS[d.getDay()]);
       values.push(s.pct);
     }
-    Charts.bar('chart-dash-bar', labels, values, 'نسبة الإنجاز', { maxY: 100 });
+    Charts.bar('chart-dash-bar', labels, values, 'نسبة الإنجاز', {
+      maxY: 100,
+      colors: ChartColors.days
+    });
 
-    /* دائري: توزيع مهام الشهر الحالي */
+    /* دائري: توزيع مهام الشهر الحالي — ✅ 3 ألوان مميزة */
     const mStats = Store.monthStats(new Date());
     Charts.pie('chart-dash-pie',
       ['منجز', 'غير منجز', 'معلّق'],
       [mStats.done, mStats.failed, mStats.pending],
-      ['#3fbf7f', '#a52a4e', '#c99a1e']
+      ChartColors.status
     );
   }
 
@@ -390,15 +495,15 @@
 
     const stats = Store.dayStats(day);
 
-    /* بطاقات صغيرة */
+    /* ✅ بطاقات صغيرة بلون مخصص لكل إحصاء */
     const statsEl = document.getElementById('day-stats');
     if (statsEl) {
       statsEl.innerHTML =
-        miniStat(stats.total, 'إجمالي المهام') +
-        miniStat(stats.done, 'منجزة') +
-        miniStat(stats.failed, 'غير منجزة') +
-        miniStat(stats.pending, 'معلّقة') +
-        miniStat(stats.pct + '%', 'نسبة الإنجاز');
+        miniStat(stats.total, 'إجمالي المهام', '#f4c430') +
+        miniStat(stats.done, 'منجزة', '#3fbf7f') +
+        miniStat(stats.failed, 'غير منجزة', '#e63946') +
+        miniStat(stats.pending, 'معلّقة', '#f9a826') +
+        miniStat(stats.pct + '%', 'نسبة الإنجاز', pctColor(stats.pct));
     }
 
     /* الفترتان */
@@ -410,10 +515,6 @@
     }
 
     renderDailyCharts(day);
-  }
-
-  function miniStat(value, label) {
-    return '<div class="mini-stat"><strong>' + value + '</strong><span>' + label + '</span></div>';
   }
 
   function renderPeriod(periodKey, title, icon, tasks) {
@@ -538,7 +639,7 @@
     UI.chartTimer = setTimeout(fn, 350);
   }
 
-  /* ---------- مخططات اليوم ---------- */
+  /* ---------- مخططات اليوم — ✅ لون مختلف لكل مهمة ---------- */
   function renderDailyCharts(day) {
     const tasks = Store.titledTasks(day);
 
@@ -553,13 +654,14 @@
         'chart-daily-bar',
         withDuration.map((t, i) => t.title || ('مهمة ' + (i + 1))),
         withDuration.map(t => t.duration),
-        'المدة (دقيقة)'
+        'المدة (دقيقة)',
+        { colors: ChartColors.tasks }
       );
     } else {
       Charts.bar('chart-daily-bar', [], [], 'المدة (دقيقة)');
     }
 
-    /* دائري: توزيع المدة على المهام */
+    /* دائري: توزيع المدة — ✅ 10 ألوان مميزة */
     const pieItems = Charts.preparePie(
       tasks.filter(t => (t.duration || 0) > 0)
            .map(t => ({ label: t.title, value: t.duration })),
@@ -569,7 +671,8 @@
     Charts.pie(
       'chart-daily-pie',
       pieItems.map(i => i.label),
-      pieItems.map(i => i.value)
+      pieItems.map(i => i.value),
+      ChartColors.tasks
     );
   }
 
@@ -590,17 +693,18 @@
 
     const stats = Store.rangeStats(start, 7);
 
+    /* ✅ بطاقات صغيرة بلون مخصص */
     const statsEl = document.getElementById('week-stats');
     if (statsEl) {
       statsEl.innerHTML =
-        miniStat(stats.total, 'إجمالي المهام') +
-        miniStat(stats.done, 'منجزة') +
-        miniStat(stats.failed, 'غير منجزة') +
-        miniStat(stats.pending, 'معلّقة') +
-        miniStat(stats.pct + '%', 'نسبة الأسبوع');
+        miniStat(stats.total, 'إجمالي المهام', '#f4c430') +
+        miniStat(stats.done, 'منجزة', '#3fbf7f') +
+        miniStat(stats.failed, 'غير منجزة', '#e63946') +
+        miniStat(stats.pending, 'معلّقة', '#f9a826') +
+        miniStat(stats.pct + '%', 'نسبة الأسبوع', pctColor(stats.pct));
     }
 
-    /* المخطط العمودي */
+    /* مخطط عمودي — ✅ لون لكل يوم */
     const labels = [], values = [];
     for (let i = 0; i < 7; i++) {
       const d = Store.addDays(start, i);
@@ -608,13 +712,16 @@
       labels.push(Store.AR_DAYS[d.getDay()]);
       values.push(s.pct);
     }
-    Charts.bar('chart-week-bar', labels, values, 'نسبة الإنجاز', { maxY: 100 });
+    Charts.bar('chart-week-bar', labels, values, 'نسبة الإنجاز', {
+      maxY: 100,
+      colors: ChartColors.days
+    });
 
-    /* المخطط الدائري */
+    /* دائري: حالة المهام */
     Charts.pie('chart-week-pie',
       ['منجز', 'غير منجز', 'معلّق'],
       [stats.done, stats.failed, stats.pending],
-      ['#3fbf7f', '#a52a4e', '#c99a1e']
+      ChartColors.status
     );
 
     /* جدول التفصيل */
@@ -655,14 +762,15 @@
     /* المكافأة */
     renderRewardBanner(stats, monthStart);
 
+    /* ✅ بطاقات صغيرة بلون مخصص */
     const statsEl = document.getElementById('month-stats');
     if (statsEl) {
       statsEl.innerHTML =
-        miniStat(stats.total, 'إجمالي المهام') +
-        miniStat(stats.done, 'منجزة') +
-        miniStat(stats.failed, 'غير منجزة') +
-        miniStat(stats.pending, 'معلّقة') +
-        miniStat(stats.pct + '%', 'نسبة الشهر');
+        miniStat(stats.total, 'إجمالي المهام', '#f4c430') +
+        miniStat(stats.done, 'منجزة', '#3fbf7f') +
+        miniStat(stats.failed, 'غير منجزة', '#e63946') +
+        miniStat(stats.pending, 'معلّقة', '#f9a826') +
+        miniStat(stats.pct + '%', 'نسبة الشهر', pctColor(stats.pct));
     }
 
     /* أسابيع الشهر */
@@ -688,12 +796,16 @@
       `);
     });
 
-    Charts.bar('chart-month-bar', labels, values, 'نسبة الإنجاز', { maxY: 100 });
+    /* مخطط عمودي — ✅ لون لكل أسبوع */
+    Charts.bar('chart-month-bar', labels, values, 'نسبة الإنجاز', {
+      maxY: 100,
+      colors: ChartColors.weeks
+    });
 
     Charts.pie('chart-month-pie',
       ['منجز', 'غير منجز', 'معلّق'],
       [stats.done, stats.failed, stats.pending],
-      ['#3fbf7f', '#a52a4e', '#c99a1e']
+      ChartColors.status
     );
 
     const tbody = document.getElementById('month-table-body');
