@@ -1,5 +1,11 @@
 /* ============================================================
-   STATISTICS — الأنماط الرئيسية (نسخة معدّلة)
+   STATISTICS — الأنماط الرئيسية (النسخة الكاملة المحدّثة)
+   ------------------------------------------------------------
+   ✅ أيقونات PNG واضحة (object-fit: contain)
+   ✅ ألوان مخصصة لكل إحصاء
+   ✅ استجابة كاملة للجوال (لا شريط خارج الشاشة)
+   ✅ زر خروج بصورة jj.jpeg
+   ✅ دعم PWA
    ============================================================ */
 
 :root{
@@ -36,7 +42,7 @@
 
 *,*::before,*::after{ box-sizing:border-box; }
 
-/* ✅ منع تجاوز عرض الشاشة على الجوال */
+/* ✅ منع التجاوز على الجوال */
 html, body{
   overflow-x:hidden;
   max-width:100%;
@@ -66,18 +72,22 @@ input,select,textarea{ font-family:inherit; }
 .hidden{ display:none !important; }
 .muted{ color:var(--muted); font-size:.9rem; }
 
-/* ---------- الشعار ---------- */
+/* ---------- ✅ الشعارات والأيقونات ---------- */
 .logo-img{
   width:84px; height:84px;
   border-radius:20px;
-  object-fit:cover;
+  object-fit:contain;            /* ✅ لا يقصّ الشعار */
+  background:#0f0f0f;
+  padding:6px;
   box-shadow:0 10px 28px rgba(244,196,48,.22);
   border:1px solid var(--line);
 }
 .brand-logo{
   width:38px; height:38px;
   border-radius:10px;
-  object-fit:cover;
+  object-fit:contain;            /* ✅ */
+  background:#0f0f0f;
+  padding:3px;
   border:1px solid var(--line);
 }
 
@@ -177,7 +187,7 @@ input,select,textarea{ font-family:inherit; }
   background:rgba(15,15,15,.92);
   backdrop-filter:blur(14px);
   border-bottom:1px solid var(--line);
-  flex-wrap:wrap; /* ✅ يسمح باللف على الجوال */
+  flex-wrap:wrap;                /* ✅ يسمح باللف على الجوال */
 }
 
 .brand{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
@@ -192,7 +202,7 @@ input,select,textarea{ font-family:inherit; }
 .tabs{
   display:flex; gap:4px;
   flex:1 1 auto;
-  min-width:0; /* ✅ ضروري لتفعيل overflow */
+  min-width:0;                   /* ✅ ضروري لتفعيل overflow */
   overflow-x:auto;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
@@ -374,16 +384,17 @@ input,select,textarea{ font-family:inherit; }
   font-size:1.9rem; font-weight:900; line-height:1.1;
   color:var(--counter-color);
   font-variant-numeric:tabular-nums;
-  text-shadow:0 0 18px color-mix(in srgb, var(--counter-color) 30%, transparent);
+  text-shadow:0 0 18px rgba(244,196,48,.18);
 }
 .counter-label{ font-size:.76rem; color:var(--muted); margin-top:6px; letter-spacing:.4px; }
 
-#c-done   { --counter-color:#3fbf7f; }
-#c-total  { --counter-color:#f4c430; }
-#c-today  { --counter-color:#4a90e2; }
-#c-week   { --counter-color:#c77dff; }
-#c-month  { --counter-color:#ff6b9d; }
-#c-active { --counter-color:#f9a826; }
+/* ✅ لون مميز لكل عداد */
+#c-done   { --counter-color:#3fbf7f; }   /* أخضر — منجز */
+#c-total  { --counter-color:#f4c430; }   /* ذهبي — الإجمالي */
+#c-today  { --counter-color:#4a90e2; }   /* أزرق — اليوم */
+#c-week   { --counter-color:#c77dff; }   /* بنفسجي — الأسبوع */
+#c-month  { --counter-color:#ff6b9d; }   /* وردي — الشهر */
+#c-active { --counter-color:#f9a826; }   /* برتقالي — الأيام النشطة */
 
 /* ============================================================
    الجدول اليومي
@@ -405,7 +416,7 @@ input,select,textarea{ font-family:inherit; }
 .mini-stat strong{
   font-size:1.25rem; color:var(--gold-light);
   font-variant-numeric:tabular-nums;
-  /* اللون يأتي inline من JS */
+  /* اللون الفعلي يأتي inline من JS */
 }
 .mini-stat span{ font-size:.74rem; color:var(--muted); }
 
