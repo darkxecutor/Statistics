@@ -2,10 +2,22 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0f0f0f">
-<title>STATISTICS — إحصائيات الإنجاز</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="STATISTICS">
+<title>STATISTICS</title>
 <meta name="description" content="STATISTICS — لوحة متابعة المهام والأهداف اليومية والأسبوعية والشهرية مع إحصائيات ومخططات ومكافآت.">
+
+<!-- ✅ الفافيكون والأيقونات (مجلد img) -->
+<link rel="icon" type="image/jpeg" href="img/logo.jpeg">
+<link rel="shortcut icon" type="image/jpeg" href="img/logo.jpeg">
+<link rel="apple-touch-icon" href="img/logo.jpeg">
+
+<!-- ✅ PWA -->
+<link rel="manifest" href="manifest.json">
 
 <!-- الخطوط -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,13 +33,24 @@
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-<!-- وحدات التطبيق (بالترتيب) -->
+<!-- وحدات التطبيق -->
 <script src="js/storage.js" defer></script>
 <script src="js/audio.js" defer></script>
 <script src="js/effects.js" defer></script>
 <script src="js/charts.js" defer></script>
 <script src="js/auth.js" defer></script>
 <script src="js/app.js" defer></script>
+
+<!-- ✅ تسجيل Service Worker (العمل بدون إنترنت) -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('[SW] registered'))
+      .catch(err => console.warn('[SW] failed', err));
+  });
+}
+</script>
 </head>
 <body>
 
@@ -39,19 +62,7 @@
 
   <div class="login-card">
     <div class="logo-block">
-      <svg class="logo-svg" viewBox="0 0 64 64" role="img" aria-label="شعار STATISTICS">
-        <defs>
-          <linearGradient id="lgA" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stop-color="#a67c00"/>
-            <stop offset="100%" stop-color="#ffd75e"/>
-          </linearGradient>
-        </defs>
-        <rect x="5"  y="38" width="11" height="20" rx="2.5" fill="url(#lgA)"/>
-        <rect x="20" y="28" width="11" height="30" rx="2.5" fill="url(#lgA)" opacity=".82"/>
-        <rect x="35" y="16" width="11" height="42" rx="2.5" fill="url(#lgA)"/>
-        <circle cx="52" cy="16" r="7.5" fill="none" stroke="#f4c430" stroke-width="3"/>
-        <circle cx="52" cy="16" r="2.2" fill="#f4c430"/>
-      </svg>
+      <img src="img/logo.jpeg" alt="شعار STATISTICS" class="logo-img" width="84" height="84">
       <h1>STATISTICS</h1>
       <span class="logo-sub">لوحة الإنجاز الشخصية</span>
     </div>
@@ -64,7 +75,7 @@
 
     <div class="demo-row">
       <input id="demo-name" class="input type-crack" type="text"
-             placeholder="اسمك — للدخول المحلي على هذا الجهاز" autocomplete="off">
+             placeholder="اسمك — للدخول المحلي" autocomplete="off">
       <button id="demo-login" class="btn btn-ghost" type="button">دخول سريع</button>
     </div>
 
@@ -75,6 +86,17 @@
       <li><span>◆</span> إحصائيات أسبوعية وشهرية وسنوية</li>
       <li><span>◆</span> نظام مكافآت عند تجاوز 85%</li>
     </ul>
+
+    <!-- ✅ أزرار التثبيت / تنزيل APK -->
+    <div class="install-block">
+      <button class="btn btn-gold install-app-btn" type="button" hidden>
+        📲 تثبيت كتطبيق
+      </button>
+      <a href="statistics.apk" download id="download-apk-login"
+         class="btn btn-ghost apk-download-btn" type="button">
+        ⬇ تنزيل APK
+      </a>
+    </div>
 
     <p id="gsi-fallback-note" class="login-note hidden">
       تعذّر تحميل خدمة Google — يمكنك استخدام الدخول السريع أعلاه.
@@ -89,18 +111,7 @@
 
   <header class="app-header">
     <div class="brand">
-      <svg class="logo-svg small" viewBox="0 0 64 64" aria-hidden="true">
-        <defs>
-          <linearGradient id="lgB" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stop-color="#a67c00"/>
-            <stop offset="100%" stop-color="#ffd75e"/>
-          </linearGradient>
-        </defs>
-        <rect x="5"  y="38" width="11" height="20" rx="2.5" fill="url(#lgB)"/>
-        <rect x="20" y="28" width="11" height="30" rx="2.5" fill="url(#lgB)" opacity=".82"/>
-        <rect x="35" y="16" width="11" height="42" rx="2.5" fill="url(#lgB)"/>
-        <circle cx="52" cy="16" r="7.5" fill="none" stroke="#f4c430" stroke-width="3"/>
-      </svg>
+      <img src="img/logo.jpeg" alt="" class="brand-logo" width="38" height="38">
       <div class="brand-text">
         <strong>STATISTICS</strong>
         <span>لوحة الإنجاز</span>
@@ -116,15 +127,20 @@
     </nav>
 
     <div class="user-chip">
-      <img id="user-avatar" alt="صورة المستخدم" width="34" height="34" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'><rect width='34' height='34' fill='%231f1f1f'/><circle cx='17' cy='13' r='6' fill='%23f4c430'/><path d='M5 30c2-6 8-9 12-9s10 3 12 9z' fill='%23f4c430'/></svg>">
+      <img id="user-avatar" alt="صورة المستخدم" width="34" height="34"
+           src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'><rect width='34' height='34' fill='%231f1f1f'/><circle cx='17' cy='13' r='6' fill='%23f4c430'/><path d='M5 30c2-6 8-9 12-9s10 3 12 9z' fill='%23f4c430'/></svg>">
       <span id="user-name">مستخدم</span>
-      <button id="logout-btn" class="btn btn-icon" title="تسجيل الخروج" aria-label="تسجيل الخروج">⏻</button>
+      <!-- ✅ زر الخروج بصورة jj.jpeg -->
+      <button id="logout-btn" class="btn btn-icon logout-btn"
+              title="تسجيل الخروج" aria-label="تسجيل الخروج">
+        <img src="img/jj.jpeg" alt="تسجيل الخروج" class="logout-img">
+      </button>
     </div>
   </header>
 
   <main class="app-main">
 
-    <!-- لوحة التحكم -->
+    <!-- ---------- لوحة التحكم ---------- -->
     <section id="view-dashboard" class="view">
       <div class="view-head">
         <h2>لوحة التحكم</h2>
@@ -158,8 +174,8 @@
         </div>
 
         <form id="new-table-form" class="new-table-form hidden">
-          <input id="new-table-name" class="input type-crack" type="text" placeholder="اسم الجدول (مثال: متابعة الرياضة)">
-          <input id="new-table-cols" class="input type-crack" type="text" placeholder="الأعمدة مفصولة بفاصلة (مثال: التمرين، المدة، ملاحظة)">
+          <input id="new-table-name" class="input type-crack" type="text" placeholder="اسم الجدول">
+          <input id="new-table-cols" class="input type-crack" type="text" placeholder="الأعمدة مفصولة بفاصلة">
           <button class="btn btn-gold" type="submit">إنشاء الجدول</button>
         </form>
 
@@ -167,20 +183,19 @@
       </div>
     </section>
 
-    <!-- الجدول اليومي -->
+    <!-- ---------- اليومي ---------- -->
     <section id="view-daily" class="view hidden">
       <div class="view-head row">
         <h2>الجدول اليومي</h2>
         <div class="date-nav">
-          <button class="btn btn-icon" id="day-prev" type="button" aria-label="اليوم السابق">›</button>
+          <button class="btn btn-icon" id="day-prev" type="button" aria-label="السابق">›</button>
           <span id="day-label" class="date-label"></span>
-          <button class="btn btn-icon" id="day-next" type="button" aria-label="اليوم التالي">‹</button>
+          <button class="btn btn-icon" id="day-next" type="button" aria-label="التالي">‹</button>
           <button class="btn btn-ghost" id="day-today" type="button">اليوم</button>
         </div>
       </div>
 
       <div class="mini-stats" id="day-stats"></div>
-
       <div class="periods" id="daily-periods"></div>
 
       <div class="grid-2">
@@ -195,14 +210,14 @@
       </div>
     </section>
 
-    <!-- الأسبوعي -->
+    <!-- ---------- الأسبوعي ---------- -->
     <section id="view-weekly" class="view hidden">
       <div class="view-head row">
         <h2>الجدول الأسبوعي</h2>
         <div class="date-nav">
-          <button class="btn btn-icon" id="week-prev" type="button" aria-label="الأسبوع السابق">›</button>
+          <button class="btn btn-icon" id="week-prev" type="button" aria-label="السابق">›</button>
           <span id="week-label" class="date-label"></span>
-          <button class="btn btn-icon" id="week-next" type="button" aria-label="الأسبوع التالي">‹</button>
+          <button class="btn btn-icon" id="week-next" type="button" aria-label="التالي">‹</button>
         </div>
       </div>
 
@@ -230,19 +245,18 @@
       </div>
     </section>
 
-    <!-- الشهري -->
+    <!-- ---------- الشهري ---------- -->
     <section id="view-monthly" class="view hidden">
       <div class="view-head row">
         <h2>الجدول الشهري</h2>
         <div class="date-nav">
-          <button class="btn btn-icon" id="month-prev" type="button" aria-label="الشهر السابق">›</button>
+          <button class="btn btn-icon" id="month-prev" type="button" aria-label="السابق">›</button>
           <span id="month-label" class="date-label"></span>
-          <button class="btn btn-icon" id="month-next" type="button" aria-label="الشهر التالي">‹</button>
+          <button class="btn btn-icon" id="month-next" type="button" aria-label="التالي">‹</button>
         </div>
       </div>
 
       <div id="monthly-reward"></div>
-
       <div class="mini-stats" id="month-stats"></div>
 
       <div class="grid-2">
@@ -267,7 +281,7 @@
       </div>
     </section>
 
-    <!-- الإعدادات -->
+    <!-- ---------- الإعدادات ---------- -->
     <section id="view-settings" class="view hidden">
       <div class="view-head"><h2>الإعدادات</h2></div>
 
@@ -280,9 +294,9 @@
         <h3>نظام المكافآت</h3>
         <div class="settings-grid">
           <label class="field"><span>وصف المكافأة الشهرية</span>
-            <input id="set-reward" class="input type-crack" type="text" placeholder="مثال: رحلة قصيرة / هدية / يوم راحة كامل">
+            <input id="set-reward" class="input type-crack" type="text" placeholder="مثال: رحلة قصيرة">
           </label>
-          <label class="field"><span>قيمة المكافأة (اختياري)</span>
+          <label class="field"><span>قيمة المكافأة</span>
             <input id="set-reward-value" class="input type-crack" type="text" placeholder="مثال: 500 درهم">
           </label>
           <label class="field"><span>نسبة الإنجاز المطلوبة (%)</span>
@@ -295,12 +309,31 @@
         <button id="save-settings" class="btn btn-gold" type="button">حفظ الإعدادات</button>
       </div>
 
+      <!-- ✅ بطاقة التثبيت -->
+      <div class="card">
+        <h3>تثبيت التطبيق</h3>
+        <p class="muted">ثبّت STATISTICS كتطبيق على جهازك واستعمله حتى بدون إنترنت.</p>
+        <div class="settings-actions">
+          <button class="btn btn-gold install-app-btn" type="button" hidden>
+            📲 تثبيت كتطبيق
+          </button>
+          <a href="statistics.apk" download class="btn btn-ghost apk-download-btn">
+            ⬇ تنزيل APK
+          </a>
+        </div>
+        <p class="muted" style="margin-top:12px;font-size:.75rem;line-height:1.6">
+          ملاحظة: ملف APK يُبنى من هذا الموقع بواسطة <strong>PWABuilder</strong>
+          أو <strong>Bubblewrap</strong> ثم يوضع باسم <code>statistics.apk</code> في جذر
+          المشروع. راجع README للخطوات.
+        </p>
+      </div>
+
       <div class="card">
         <h3>البيانات</h3>
         <p class="muted">جميع بياناتك محفوظة تلقائيًا على هذا الجهاز ومرتبطة بحسابك.</p>
         <div class="settings-actions">
-          <button id="export-data" class="btn btn-ghost" type="button">تصدير نسخة احتياطية (JSON)</button>
-          <label class="btn btn-ghost file-btn">استيراد نسخة
+          <button id="export-data" class="btn btn-ghost" type="button">تصدير JSON</button>
+          <label class="btn btn-ghost file-btn">استيراد
             <input type="file" id="import-data" accept="application/json" hidden>
           </label>
           <button id="reset-data" class="btn btn-danger" type="button">حذف كل البيانات</button>
@@ -315,7 +348,7 @@
 
 <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
-<noscript><p style="padding:2rem;text-align:center">يجب تفعيل JavaScript لتشغيل الموقع.</p></noscript>
+<noscript><p style="padding:2rem;text-align:center">يجب تفعيل JavaScript.</p></noscript>
 
 </body>
 </html>
