@@ -1,5 +1,5 @@
 /* ============================================================
-   charts.js — إدارة المخططات (Chart.js)
+   charts.js — إدارة المخططات (يدعم ألوانًا مخصصة)
    ============================================================ */
 'use strict';
 
@@ -8,14 +8,10 @@ const Charts = (function () {
   const registry = {};
   let ready = false;
 
-  /* لوحة ألوان الذهبي/الأسود/الرمادي */
   const PALETTE = [
-    '#f4c430', '#ffd75e', '#c99a1e', '#a67c00',
-    '#8a6d14', '#7a5c00', '#5c4a10', '#4a3800',
-    '#3a2f0a', '#2e2300'
+    '#f4c430', '#3fbf7f', '#e07a5f', '#4a90e2', '#c77dff',
+    '#ff6b9d', '#f9a826', '#06d6a0', '#ef476f', '#118ab2'
   ];
-
-  const ACCENTS = ['#f4c430', '#a52a4e', '#3fbf7f', '#c99a1e', '#73022c'];
 
   function ensureReady() {
     if (ready) return true;
@@ -35,27 +31,25 @@ const Charts = (function () {
     }
   }
 
-  function destroyAll() {
-    Object.keys(registry).forEach(destroy);
+  function destroyAll() { Object.keys(registry).forEach(destroy); }
+  function el(id) { return document.getElementById(id); }
+
+  function withAlpha(hex, alphaHex) {
+    // إذا كان اللون hex 6 أرقام نضيف alpha
+    if (/^#[0-9a-fA-F]{6}$/.test(hex)) return hex + alphaHex;
+    return hex;
   }
 
-  function el(id) {
-    const c = document.getElementById(id);
-    if (!c) return null;
-    return c;
-  }
-
-  /* ---------- مخطط عمودي ---------- */
+  /* ---------- عمودي ---------- */
   function bar(id, labels, values, label, options) {
     if (!ensureReady()) return null;
     const canvas = el(id);
     if (!canvas) return null;
     destroy(id);
 
-    const opts = Object.assign({
-      barPercentage: 0.66,
-      categoryPercentage: 0.8
-    }, options || {});
+    const opts = options || {};
+    const colors = opts.colors || PALETTE;
+    const maxY = opts.maxY;
 
     registry[id] = new Chart(canvas.getContext('2d'), {
       type: 'bar',
@@ -64,8 +58,8 @@ const Charts = (function () {
         datasets: [{
           label: label || 'القيمة',
           data: values,
-          backgroundColor: values.map((_, i) => PALETTE[i % PALETTE.length] + 'cc'),
-          borderColor: values.map((_, i) => PALETTE[i % PALETTE.length]),
+          backgroundColor: values.map((_, i) => withAlpha(colors[i % colors.length], 'cc')),
+          borderColor: values.map((_, i) => colors[i % colors.length]),
           borderWidth: 1.5,
           borderRadius: 6,
           hoverBackgroundColor: '#ffd75e',
@@ -85,25 +79,19 @@ const Charts = (function () {
             backgroundColor: 'rgba(20,20,20,.95)',
             borderColor: 'rgba(244,196,48,.45)',
             borderWidth: 1,
-            padding: 10,
-            titleFont: { family: "'Cairo', sans-serif", weight: '700' },
-            bodyFont: { family: "'Cairo', sans-serif" }
+            padding: 10
           }
         },
         scales: {
           y: {
             beginAtZero: true,
-            suggestedMax: opts.maxY || undefined,
-            grid: { color: 'rgba(244,196,48,.10)' },
-            ticks: { color: '#9a948a', font: { size: 11 } }
+            suggestedMax: maxY,
+            grid: { color: 'rgba(244,196,48,.10)' }
           },
           x: {
             grid: { display: false },
             ticks: {
-              color: '#b8b2a6',
-              font: { size: 11 },
               maxRotation: 40,
-              minRotation: 0,
               autoSkip: false,
               callback: function (value) {
                 const t = this.getLabelForValue(value);
@@ -117,7 +105,7 @@ const Charts = (function () {
     return registry[id];
   }
 
-  /* ---------- مخطط دائري ---------- */
+  /* ---------- دائري ---------- */
   function pie(id, labels, values, colors) {
     if (!ensureReady()) return null;
     const canvas = el(id);
@@ -125,8 +113,9 @@ const Charts = (function () {
     destroy(id);
 
     const total = values.reduce((a, b) => a + b, 0);
+    const palette = colors || PALETTE;
+
     if (!total) {
-      // لا بيانات
       registry[id] = new Chart(canvas.getContext('2d'), {
         type: 'doughnut',
         data: { labels: ['لا بيانات'], datasets: [{ data: [1], backgroundColor: ['#232323'], borderWidth: 0 }] },
@@ -138,8 +127,6 @@ const Charts = (function () {
       });
       return registry[id];
     }
-
-    const palette = colors || PALETTE;
 
     registry[id] = new Chart(canvas.getContext('2d'), {
       type: 'doughnut',
@@ -195,10 +182,6 @@ const Charts = (function () {
     return registry[id];
   }
 
-  /**
-   * تجهيز بيانات الدائري:
-   * ترتيب تنازلي + دمج ما زاد عن 10 شرائح في "أخرى"
-   */
   function preparePie(items, maxSlices) {
     const max = maxSlices || 10;
     const sorted = items.filter(it => it.value > 0)
@@ -211,5 +194,5 @@ const Charts = (function () {
     return head;
   }
 
-  return { bar, pie, destroy, destroyAll, preparePie, PALETTE, ACCENTS };
+  return { bar, pie, destroy, destroyAll, preparePie, PALETTE };
 })();
