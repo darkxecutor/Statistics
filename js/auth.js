@@ -1,5 +1,5 @@
 /* ============================================================
-   auth.js — المصادقة عبر Google Sign-In
+   auth.js — المصادقة عبر Google Sign-In والربط مع Firebase
    ============================================================ */
 'use strict';
 
@@ -11,7 +11,7 @@ const Auth = (function () {
   let initialized = false;
   let onLoginCallback = null;
 
-  /* ---------- فك تشفير JWT (بدون تحقق — للقراءة فقط) ---------- */
+  /* ---------- فك تشفير JWT ---------- */
   function decodeJwt(token) {
     try {
       const base64Url = token.split('.')[1];
@@ -29,11 +29,58 @@ const Auth = (function () {
     }
   }
 
+  /* ---------- تسجيل المستخدم في Firebase ---------- */
+  async function logToFirebase(user) {
+    if (!window.db) {
+      console.warn('Firebase غير متصل، تم تخطي تسجيل البيانات.');
+      return;
+    }
+    try {
+      // استدعاء دوال Firebase ديناميكياً
+      const { doc, getDoc, setDoc, updateDoc, increment, serverTimestamp } = 
+        await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+
+      const userRef = doc(window.db, "users", user.sub);
+      const userSnap = await getDoc(userRef);
+      const platformStatsRef = doc(window.db, "stats", "platform");
+
+      if (!userSnap.exists()) {
+        // مستخدم جديد: إنشاء ملفه وزيادة عدد المسجلين
+        await setDoc(userRef, {
+          name: user.name,
+          email: user.email,
+          picture: user.picture,
+          createdAt: serverTimestamp(),
+          lastLogin: serverTimestamp(),
+          loginCount: 1
+        });
+        
+        await setDoc(platformStatsRef, {
+          totalUsers: increment(1),
+          totalLogins: increment(1)
+        }, { merge: true });
+
+      } else {
+        // مستخدم موجود: تحديث آخر دخول وزيادة عداد الدخولات
+        await updateDoc(userRef, {
+          lastLogin: serverTimestamp(),
+          loginCount: increment(1)
+        });
+        
+        await setDoc(platformStatsRef, {
+          totalLogins: increment(1)
+        }, { merge: true });
+      }
+    } catch (e) {
+      console.warn("فشل الاتصال بقاعدة بيانات Firebase", e);
+    }
+  }
+
   /* ---------- معالجة استجابة Google ---------- */
-  function handleCredential(response) {
+  async function handleCredential(response) {
     const payload = decodeJwt(response.credential);
     if (!payload) {
-      showToast('تعذّر قراءة بيانات الحساب.', 'err');
+      if (typeof showToast === 'function') showToast('تعذّر قراءة بيانات الحساب.', 'err');
       return;
     }
     const user = {
@@ -42,16 +89,18 @@ const Auth = (function () {
       email: payload.email || '',
       picture: payload.picture || ''
     };
+
+    // ✅ تسجيل الدخول في Firebase
+    await logToFirebase(user);
+
     if (onLoginCallback) onLoginCallback(user);
   }
 
-  /* ---------- عرض ملاحظة الاحتياط ---------- */
   function showFallbackNote() {
     const note = document.getElementById('gsi-fallback-note');
     if (note) note.classList.remove('hidden');
   }
 
-  /* ---------- التهيئة ---------- */
   function init(callback) {
     onLoginCallback = callback;
     if (initialized) return;
@@ -94,7 +143,6 @@ const Auth = (function () {
     }, 300);
   }
 
-  /* ---------- تسجيل الخروج ---------- */
   function logout() {
     try {
       if (window.google && google.accounts && google.accounts.id) {
@@ -104,5 +152,5 @@ const Auth = (function () {
     Store.clearSession();
   }
 
-  return { init, logout, decodeJwt };
+  return { init, logout, decodeJwt, logToFirebase };
 })();
